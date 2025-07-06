@@ -34,8 +34,9 @@ export default function Navbar() {
   const toggleAboutDropdown = () => {
     setIsAboutDropdownOpen((open) => !open);
   };
-  const openAboutDropdown = () => setIsAboutDropdownOpen(true);
-  const closeAboutDropdown = () => setIsAboutDropdownOpen(false);
+  // These functions were not being used and have been commented out
+  // const openAboutDropdown = () => setIsAboutDropdownOpen(true);
+  // const closeAboutDropdown = () => setIsAboutDropdownOpen(false);
 
   return (
     <nav className="bg-[#0053c7] shadow-md sticky top-0 z-50 py-2 md:py-4">

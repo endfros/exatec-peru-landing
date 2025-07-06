@@ -70,7 +70,7 @@ export default function Testimonials() {
                   }`}
                 >
                   <p className="text-xl md:text-2xl text-gray-700 italic mb-6">
-                    "{testimonial.quote}"
+                    &ldquo;{testimonial.quote}&rdquo;
                   </p>
                   <div>
                     <p className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">

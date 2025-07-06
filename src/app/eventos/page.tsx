@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { metadata } from './metadata';
+// Metadata importada solo cuando se necesite
 
 // Sample events data
 const events = [

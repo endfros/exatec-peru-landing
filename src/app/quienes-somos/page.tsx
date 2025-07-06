@@ -1,4 +1,5 @@
-import Image from 'next/image';
+// Image se usará cuando se necesiten imágenes optimizadas
+// import Image from 'next/image';
 
 export const metadata = {
   title: 'Quienes Somos | EXATEC Perú',

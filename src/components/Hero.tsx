@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import Image from 'next/image';
+// Image import removed as it's not being used
+// import Image from 'next/image';
 
 export default function Hero() {
   return (

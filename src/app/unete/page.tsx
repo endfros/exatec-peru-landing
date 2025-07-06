@@ -50,24 +50,8 @@ export default function JoinUsPage() {
     graduationYears.push(year.toString());
   }
 
-  // Sample career options
-  const careers = [
-    'Administración de Empresas',
-    'Arquitectura',
-    'Ciencias de la Comunicación',
-    'Contabilidad y Finanzas',
-    'Derecho',
-    'Diseño Industrial',
-    'Economía',
-    'Ingeniería Civil',
-    'Ingeniería en Sistemas',
-    'Ingeniería Industrial',
-    'Marketing',
-    'Medicina',
-    'Psicología',
-    'Relaciones Internacionales',
-    'Otro',
-  ];
+  // Career options are now handled as free text input
+  // The careers list was removed since we use free text input now
 
   return (
     <div className="min-h-screen bg-white">
