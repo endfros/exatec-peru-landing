@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { createBrowserSupabaseClient } from '@/lib/supabase/browser';
-import Image from 'next/image';
 
 export default function JoinUsPage() {
   const [formData, setFormData] = useState({

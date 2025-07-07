@@ -62,13 +62,12 @@ export type DirectoryMember = {
 
 export default function DirectoryAdminPage() {
   const [members, setMembers] = useState<DirectoryMember[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<DirectoryMember | null>(null);
   const [form, setForm] = useState<Partial<DirectoryMember>>({});
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState<boolean>(false);
   const supabase = createBrowserSupabaseClient();
-
 
   useEffect(() => {
     // Definir la función dentro del useEffect para evitar la advertencia de dependencia

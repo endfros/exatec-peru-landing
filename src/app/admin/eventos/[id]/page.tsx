@@ -4,17 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ImageUploader from '@/components/ImageUploader';
 
-// Type for the page props
-type EditEventPageProps = {
-  params: {
-    id: string;
-  };
-};
+type Props = any;
 
-// Tipo para los eventos
-// (Eliminado: type Event, no se usa)
-
-export default function EditEventPage({ params }: EditEventPageProps) {
+export default function EditEventPage({ params }: Props) {
   const router = useRouter();
   const eventId = params.id;
   const [loading, setLoading] = useState(true);
@@ -40,49 +32,35 @@ export default function EditEventPage({ params }: EditEventPageProps) {
     { value: 'institutional', label: 'Institucional' },
   ];
 
-  // Cargar datos del evento al montar el componente
   useEffect(() => {
     async function fetchEvent() {
       try {
-        const response = await fetch(`/api/events/${eventId}`);
-
-        if (!response.ok) {
-          throw new Error('Error al cargar el evento');
-        }
-
-        const eventData = await response.json();
-
-        // Formatear la fecha para el input de tipo date (YYYY-MM-DD)
-        const eventDate = new Date(eventData.date);
-        const formattedDate = eventDate.toISOString().split('T')[0];
-
+        const res = await fetch(`/api/events/${eventId}`);
+        if (!res.ok) throw new Error('Error al cargar el evento');
+        const evt = await res.json();
+        const d = new Date(evt.date).toISOString().split('T')[0];
         setFormData({
-          title: eventData.title,
-          date: formattedDate,
-          time: eventData.time || '',
-          location: eventData.location || '',
-          category: eventData.category,
-          description: eventData.description || '',
-          image: eventData.image || '/placeholder.jpg',
-          registration_url: eventData.registration_url || '',
+          title: evt.title,
+          date: d,
+          time: evt.time || '',
+          location: evt.location || '',
+          category: evt.category,
+          description: evt.description || '',
+          image: evt.image || '/placeholder.jpg',
+          registration_url: evt.registration_url || '',
         });
-      } catch (err) {
-        console.error('Error fetching event:', err);
+      } catch (e) {
+        console.error(e);
         setError('Error al cargar el evento');
       } finally {
         setLoading(false);
       }
     }
-
     fetchEvent();
   }, [eventId]);
 
-  const handleImageChange = (imageUrl: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      image: imageUrl,
-    }));
-  };
+  const handleImageChange = (imageUrl: string) =>
+    setFormData((f) => ({ ...f, image: imageUrl }));
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -90,49 +68,40 @@ export default function EditEventPage({ params }: EditEventPageProps) {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((f) => ({ ...f, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
-
     try {
-      const response = await fetch(`/api/events/${eventId}`, {
+      const res = await fetch(`/api/events/${eventId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Error al actualizar el evento');
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || 'Error al actualizar el evento');
       }
-
-      // Redireccionar a la página de eventos
       router.push('/admin/eventos');
-    } catch (err) {
-      const errorMsg = (err instanceof Error) ? err.message : 'Error al actualizar el evento';
-      console.error('Error updating event:', err);
-      setError(errorMsg);
+    } catch (e) {
+      const msg =
+        e instanceof Error ? e.message : 'Error al actualizar el evento';
+      console.error(e);
+      setError(msg);
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
       <div className="flex justify-center items-center h-64">
         <div className="text-[#0053c7] text-lg">Cargando evento...</div>
       </div>
     );
-  }
 
   return (
     <div>

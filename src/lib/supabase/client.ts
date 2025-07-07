@@ -74,7 +74,7 @@ export const uploadImage = async (
     const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
 
     // Sube el archivo al bucket especificado usando el cliente singleton
-    const { data, error } = await supabaseClient.storage
+    const { error } = await supabaseClient.storage
       .from(bucket)
       .upload(`images/${fileName}`, file);
 

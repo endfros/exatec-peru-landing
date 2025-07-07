@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import AboutCarousel from '@/components/AboutCarousel';
 
 export const metadata = {

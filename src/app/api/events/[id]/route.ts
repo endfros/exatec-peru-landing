@@ -164,12 +164,6 @@ export async function DELETE(
       await deleteImage(eventExists.image);
     }
 
-    // Eliminar evento
-    const { error: deleteError } = await supabase
-      .from('events')
-      .delete()
-      .eq('id', id);
-
     return NextResponse.json(
       { message: 'Evento eliminado correctamente' },
       { status: 200 }

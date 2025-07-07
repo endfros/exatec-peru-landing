@@ -36,7 +36,7 @@ function Content({ children }: { children: React.ReactNode }) {
 
     // Escuchar cambios en la sesión
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event: string, session: any) => {
         console.log('Cambio en estado de autenticación:', event);
         setSession(session);
       }

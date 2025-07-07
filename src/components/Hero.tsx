@@ -9,9 +9,6 @@ export default function Hero() {
   const totalImages = 5;
 
   // Function to handle manual navigation
-  const goToImage = (imageNumber: number) => {
-    setCurrentImage(imageNumber);
-  };
 
   // Function to go to next image
   const nextImage = () => {
@@ -19,9 +16,6 @@ export default function Hero() {
   };
 
   // Function to go to previous image
-  const prevImage = () => {
-    setCurrentImage((prev) => (prev === 1 ? totalImages : prev - 1));
-  };
 
   // Auto-rotate images every 5 seconds
   useEffect(() => {

@@ -125,9 +125,11 @@ export default function NewEventPage() {
       let msg = 'Error desconocido al crear el evento';
       if (err instanceof Error) {
         if (err.message.includes('fetch')) {
-          msg = 'Error de conexión al servidor. Verifica tu conexión a internet.';
+          msg =
+            'Error de conexión al servidor. Verifica tu conexión a internet.';
         } else if (err.message.includes('JSON')) {
-          msg = 'Error en la respuesta del servidor. Contacta al administrador.';
+          msg =
+            'Error en la respuesta del servidor. Contacta al administrador.';
         } else {
           msg = err.message;
         }
