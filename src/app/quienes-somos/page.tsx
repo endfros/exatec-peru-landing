@@ -1,5 +1,5 @@
-// Image se usará cuando se necesiten imágenes optimizadas
-// import Image from 'next/image';
+import Image from 'next/image';
+import AboutCarousel from '@/components/AboutCarousel';
 
 export const metadata = {
   title: 'Quienes Somos | EXATEC Perú',
@@ -48,20 +48,7 @@ export default function AboutUsPage() {
               representar los valores del Tecnológico de Monterrey en Perú.
             </p>
           </div>
-          <div className="bg-[#0053c7]/10 rounded-lg h-80 flex items-center justify-center">
-            {/* Placeholder for image - Replace with actual image */}
-            <p className="text-[#0053c7] text-lg font-semibold">
-              Imagen de la comunidad EXATEC Perú
-            </p>
-            {/* 
-            <Image 
-              src="/images/about-exatec.jpg" 
-              alt="Comunidad EXATEC Perú" 
-              fill 
-              className="object-cover rounded-lg" 
-            /> 
-            */}
-          </div>
+          <AboutCarousel />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">

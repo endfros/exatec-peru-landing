@@ -1,6 +1,6 @@
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
-import Testimonials from '@/components/Testimonials';
+import UpcomingEvents from '@/components/UpcomingEvents';
 import CallToAction from '@/components/CallToAction';
 
 export default function Home() {
@@ -8,7 +8,7 @@ export default function Home() {
     <>
       <Hero />
       <Features />
-      <Testimonials />
+      <UpcomingEvents />
       <CallToAction />
     </>
   );

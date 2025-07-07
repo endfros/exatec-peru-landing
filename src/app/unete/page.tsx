@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { createBrowserSupabaseClient } from '@/lib/supabase/browser';
+import Image from 'next/image';
 
 export default function JoinUsPage() {
   const [formData, setFormData] = useState({
@@ -9,38 +11,99 @@ export default function JoinUsPage() {
     phone: '',
     graduationYear: '',
     career: '',
+    sector: '',
+    linkedinUrl: '',
     message: '',
+    termsAccepted: false,
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target as HTMLInputElement;
     setFormData((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would normally send the data to your backend
-    console.log('Form submitted:', formData);
-    // Show success message
-    setIsSubmitted(true);
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      graduationYear: '',
-      career: '',
-      message: '',
-    });
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const supabase = createBrowserSupabaseClient();
+
+      // Verificar que los términos han sido aceptados
+      if (!formData.termsAccepted) {
+        setError('Debes aceptar los términos y condiciones para continuar.');
+        return;
+      }
+
+      // Guardar los datos en la tabla exatecs
+      const { data, error: supabaseError } = await supabase
+        .from('exatecs')
+        .insert([
+          {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone || null,
+            career: formData.career,
+            graduation_year: formData.graduationYear,
+            sector: formData.sector || null,
+            linkedin_url: formData.linkedinUrl || null,
+            message: formData.message || null,
+            terms_accepted: formData.termsAccepted,
+          },
+        ]);
+
+      if (supabaseError) {
+        console.error('Error guardando datos:', supabaseError);
+
+        // Manejar errores comunes
+        if (supabaseError.code === '23505') {
+          // Violación de unique constraint
+          setError(
+            'Ya existe un registro con este correo electrónico. Si ya enviaste tu solicitud anteriormente, por favor espera nuestra respuesta.'
+          );
+        } else {
+          setError(`Error al enviar el formulario: ${supabaseError.message}`);
+        }
+        return;
+      }
+
+      console.log('Registro guardado correctamente:', data);
+
+      // Mostrar mensaje de éxito
+      setIsSubmitted(true);
+
+      // Resetear el formulario
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        graduationYear: '',
+        career: '',
+        sector: '',
+        linkedinUrl: '',
+        message: '',
+        termsAccepted: false,
+      });
+    } catch (error: any) {
+      console.error('Error en el envío:', error);
+      setError(
+        'Ocurrió un error inesperado. Por favor, intenta nuevamente más tarde.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Generate graduation years options
@@ -256,9 +319,31 @@ export default function JoinUsPage() {
                   Hemos recibido tu solicitud y nos pondremos en contacto
                   contigo próximamente.
                 </p>
+                <div className="mb-8">
+                  <h4 className="text-xl font-semibold text-[#0053c7] mb-2">
+                    Únete a nuestro grupo de WhatsApp
+                  </h4>
+                  <p className="text-gray-700 mb-4">
+                    Puedes unirte al grupo EXATEC Perú en WhatsApp usando el
+                    siguiente enlace o escaneando el código QR:
+                  </p>
+                  <img
+                    src="/images/qr_whatsapp.png"
+                    alt="QR para grupo WhatsApp EXATEC Perú"
+                    className="mx-auto mb-4 w-48 h-48 object-contain rounded-md"
+                  />
+                  <a
+                    href="https://chat.whatsapp.com/JByJfbnGfxu3QDNR8JAe84"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-6 py-3 bg-[#25D366] text-white font-bold rounded-md hover:bg-[#128C7E] transition mb-2"
+                  >
+                    Unirme al grupo de WhatsApp
+                  </a>
+                </div>
                 <button
                   onClick={() => setIsSubmitted(false)}
-                  className="px-6 py-3 bg-primary text-white font-semibold rounded-md hover:bg-blue-700 transition"
+                  className="px-6 py-3 bg-[#0053c7] text-white font-semibold rounded-md hover:bg-[#003a8c] transition"
                 >
                   Enviar otra solicitud
                 </button>
@@ -268,6 +353,12 @@ export default function JoinUsPage() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
                   Completa tus datos
                 </h2>
+
+                {error && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
+                    {error}
+                  </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
@@ -311,7 +402,7 @@ export default function JoinUsPage() {
                       htmlFor="phone"
                       className="block text-gray-700 font-medium mb-2"
                     >
-                      Teléfono
+                      Teléfono *
                     </label>
                     <input
                       type="tel"
@@ -319,6 +410,7 @@ export default function JoinUsPage() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
+                      required
                       className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
@@ -368,6 +460,60 @@ export default function JoinUsPage() {
 
                   <div>
                     <label
+                      htmlFor="sector"
+                      className="block text-gray-700 font-medium mb-2"
+                    >
+                      Sector económico *
+                    </label>
+                    <select
+                      id="sector"
+                      name="sector"
+                      required
+                      value={formData.sector}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <option value="">Selecciona un sector</option>
+                      <option value="Tecnología">Tecnología</option>
+                      <option value="Finanzas">Finanzas</option>
+                      <option value="Salud">Salud</option>
+                      <option value="Educación">Educación</option>
+                      <option value="Manufactura">Manufactura</option>
+                      <option value="Comercio">Comercio</option>
+                      <option value="Servicios">Servicios</option>
+                      <option value="Consultoría">Consultoría</option>
+                      <option value="Minería">Minería</option>
+                      <option value="Agricultura">Agricultura</option>
+                      <option value="Construcción">Construcción</option>
+                      <option value="Energía">Energía</option>
+                      <option value="Turismo">Turismo</option>
+                      <option value="Gobierno">Gobierno</option>
+                      <option value="ONG">ONG</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="linkedinUrl"
+                      className="block text-gray-700 font-medium mb-2"
+                    >
+                      URL de LinkedIn *
+                    </label>
+                    <input
+                      type="url"
+                      id="linkedinUrl"
+                      name="linkedinUrl"
+                      value={formData.linkedinUrl}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="https://linkedin.com/in/tu-perfil"
+                    />
+                  </div>
+
+                  <div>
+                    <label
                       htmlFor="message"
                       className="block text-gray-700 font-medium mb-2"
                     >
@@ -385,11 +531,78 @@ export default function JoinUsPage() {
                   </div>
 
                   <div className="pt-4">
+                    <div className="flex items-start">
+                      <div className="flex items-center h-5">
+                        <input
+                          id="termsAccepted"
+                          name="termsAccepted"
+                          type="checkbox"
+                          checked={formData.termsAccepted}
+                          onChange={handleChange}
+                          required
+                          className="h-4 w-4 text-[#0053c7] border-gray-300 rounded focus:ring-[#0053c7]"
+                        />
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label
+                          htmlFor="termsAccepted"
+                          className="text-gray-700"
+                        >
+                          Acepto los{' '}
+                          <a
+                            href="https://docs.google.com/document/d/1lAAe31YctgfzqdbaqSDGfOL6h-3Bnpz1gxlH-V5huc0/edit?usp=sharing"
+                            className="text-[#0053c7] font-medium hover:underline"
+                            target="_blank"
+                          >
+                            términos y condiciones
+                          </a>{' '}
+                          de participación en EXATEC Perú y autorizo el
+                          tratamiento de mis datos personales de acuerdo a la{' '}
+                          <a
+                            href="#"
+                            className="text-[#0053c7] font-medium hover:underline"
+                          >
+                            política de privacidad
+                          </a>
+                          . *
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4">
                     <button
                       type="submit"
-                      className="w-full px-6 py-3 bg-primary text-white font-bold text-lg rounded-md hover:bg-blue-700 transition"
+                      disabled={isSubmitting}
+                      className="w-full px-6 py-3 bg-[#0053c7] text-white font-bold text-lg rounded-md hover:bg-[#003a8c] transition disabled:bg-[#0053c7]/50 disabled:cursor-not-allowed"
                     >
-                      Enviar solicitud
+                      {isSubmitting ? (
+                        <span className="flex items-center justify-center">
+                          <svg
+                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          Enviando...
+                        </span>
+                      ) : (
+                        'Enviar solicitud'
+                      )}
                     </button>
                   </div>
 

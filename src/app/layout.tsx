@@ -1,8 +1,8 @@
-import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import ClientAuthProvider from '../components/ClientAuthProvider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: 'EXATEC Perú - Comunidad de Exalumnos del Tecnológico de Monterrey',
   description:
     'La comunidad de exalumnos del Tecnológico de Monterrey en Perú que conecta talento y oportunidades.',
@@ -29,10 +29,13 @@ export default function RootLayout({
     <html lang="es">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        suppressHydrationWarning
       >
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
+        <ClientAuthProvider>
+          <Navbar />
+          <main className="flex-grow">{children}</main>
+          <Footer />
+        </ClientAuthProvider>
       </body>
     </html>
   );
