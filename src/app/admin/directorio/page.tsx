@@ -69,9 +69,27 @@ export default function DirectoryAdminPage() {
   const [showForm, setShowForm] = useState(false);
   const supabase = createBrowserSupabaseClient();
 
+
   useEffect(() => {
+    // Definir la función dentro del useEffect para evitar la advertencia de dependencia
+    async function fetchMembers() {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('exatecs_directory')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        setMembers(data || []);
+      } catch (err) {
+        setError('Error al cargar el directorio');
+        console.error('Error fetching directory:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
     fetchMembers();
-  }, []);
+  }, [supabase]);
 
   async function fetchMembers() {
     setLoading(true);

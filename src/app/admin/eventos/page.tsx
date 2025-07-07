@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import { Event } from '@/lib/supabase/client';
 import { createBrowserSupabaseClient } from '@/lib/supabase/browser';
 
@@ -12,7 +12,7 @@ export default function EventsAdminPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  // const router = useRouter();
 
   const supabase = createBrowserSupabaseClient();
 
@@ -39,7 +39,7 @@ export default function EventsAdminPage() {
     }
 
     fetchEvents();
-  }, []);
+  }, [supabase]);
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este evento?')) {

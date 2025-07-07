@@ -120,21 +120,19 @@ export default function NewEventPage() {
 
       // Redireccionar a la página de eventos
       router.push('/admin/eventos');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error completo:', err);
-
-      // Mostrar mensaje detallado según el tipo de error
-      if (err.message?.includes('fetch')) {
-        setError(
-          'Error de conexión al servidor. Verifica tu conexión a internet.'
-        );
-      } else if (err.message?.includes('JSON')) {
-        setError(
-          'Error en la respuesta del servidor. Contacta al administrador.'
-        );
-      } else {
-        setError(err.message || 'Error desconocido al crear el evento');
+      let msg = 'Error desconocido al crear el evento';
+      if (err instanceof Error) {
+        if (err.message.includes('fetch')) {
+          msg = 'Error de conexión al servidor. Verifica tu conexión a internet.';
+        } else if (err.message.includes('JSON')) {
+          msg = 'Error en la respuesta del servidor. Contacta al administrador.';
+        } else {
+          msg = err.message;
+        }
       }
+      setError(msg);
     } finally {
       setLoading(false);
     }

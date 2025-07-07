@@ -12,17 +12,7 @@ type EditEventPageProps = {
 };
 
 // Tipo para los eventos
-type Event = {
-  id: number;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  category: string;
-  description: string;
-  image?: string;
-  registration_url?: string;
-};
+// (Eliminado: type Event, no se usa)
 
 export default function EditEventPage({ params }: EditEventPageProps) {
   const router = useRouter();
@@ -127,9 +117,10 @@ export default function EditEventPage({ params }: EditEventPageProps) {
 
       // Redireccionar a la página de eventos
       router.push('/admin/eventos');
-    } catch (err: any) {
+    } catch (err) {
+      const errorMsg = (err instanceof Error) ? err.message : 'Error al actualizar el evento';
       console.error('Error updating event:', err);
-      setError(err.message || 'Error al actualizar el evento');
+      setError(errorMsg);
     } finally {
       setSaving(false);
     }
