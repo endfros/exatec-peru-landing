@@ -18,11 +18,7 @@ type Event = {
   registration_url?: string;
 };
 
-export default function EventDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function EventDetailPage({ params }: any) {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +28,9 @@ export default function EventDetailPage({
     async function fetchEvent() {
       try {
         setLoading(true);
-        const response = await fetch(`/api/events/${params.id}`);
+        const eventId = Array.isArray(params?.id) ? params?.id[0] : params?.id;
+        if (!eventId) throw new Error('ID de evento inválido');
+        const response = await fetch(`/api/events/${eventId}`);
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -52,10 +50,10 @@ export default function EventDetailPage({
       }
     }
 
-    if (params.id) {
+    if (params?.id) {
       fetchEvent();
     }
-  }, [params.id]);
+  }, [params]);
 
   // Formatear fecha
   const formatDate = (dateString: string) => {

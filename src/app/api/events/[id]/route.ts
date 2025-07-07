@@ -1,14 +1,13 @@
-import { NextResponse } from 'next/server';
+// src/app/api/events/[id]/route.ts
+
+import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { deleteImage } from '@/lib/supabase/client';
 
-// GET para obtener un evento específico
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+// GET: obtener un evento por ID
+export async function GET(request: NextRequest, { params }: any) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(params?.id, 10);
     const supabase = createServerSupabaseClient();
 
     if (isNaN(id)) {
@@ -32,8 +31,8 @@ export async function GET(
     }
 
     return NextResponse.json(event);
-  } catch (error) {
-    console.error('Error al obtener evento:', error);
+  } catch (err) {
+    console.error('Error al obtener evento:', err);
     return NextResponse.json(
       { error: 'Error al obtener evento' },
       { status: 500 }
@@ -41,25 +40,21 @@ export async function GET(
   }
 }
 
-// PUT para actualizar un evento
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+// PUT: actualizar un evento existente
+export async function PUT(request: NextRequest, { params }: any) {
   try {
+    const id = parseInt(params.id, 10);
     const supabase = createServerSupabaseClient();
 
-    // Verificar autenticación
+    // 1) Verificar autenticación
     const {
       data: { session },
     } = await supabase.auth.getSession();
-
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const id = parseInt(params.id);
-
+    // 2) Validar ID
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'ID de evento inválido' },
@@ -67,35 +62,33 @@ export async function PUT(
       );
     }
 
-    const data = await request.json();
+    const payload = await request.json();
 
-    // Verificar que el evento existe
-    const { data: eventExists, error: existsError } = await supabase
+    // 3) Verificar que el evento exista
+    const { data: existing, error: existsError } = await supabase
       .from('events')
       .select('*')
       .eq('id', id)
       .single();
-
-    if (existsError || !eventExists) {
+    if (existsError || !existing) {
       return NextResponse.json(
         { error: 'Evento no encontrado' },
         { status: 404 }
       );
     }
 
-    // Actualizar evento
+    // 4) Ejecutar actualización
     const { data: updatedEvent, error: updateError } = await supabase
       .from('events')
       .update({
-        title: data.title,
-        date: data.date,
-        time: data.time,
-        location: data.location,
-        category: data.category,
-        description: data.description,
-        image: data.image,
-        registration_url: data.registration_url,
-        // user_id eliminado porque no existe en la tabla
+        title: payload.title,
+        date: payload.date,
+        time: payload.time,
+        location: payload.location,
+        category: payload.category,
+        description: payload.description,
+        image: payload.image,
+        registration_url: payload.registration_url,
       })
       .eq('id', id)
       .select()
@@ -106,37 +99,30 @@ export async function PUT(
     }
 
     return NextResponse.json(updatedEvent);
-  } catch (error: any) {
-    console.error('Error al actualizar evento:', error);
+  } catch (err: any) {
+    console.error('Error al actualizar evento:', err);
     return NextResponse.json(
-      {
-        error:
-          error?.message || error?.toString() || 'Error al actualizar evento',
-      },
+      { error: err.message || 'Error al actualizar evento' },
       { status: 500 }
     );
   }
 }
 
-// DELETE para eliminar un evento
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+// DELETE: eliminar un evento (y su imagen si aplica)
+export async function DELETE(request: NextRequest, { params }: any) {
   try {
+    const id = parseInt(params.id, 10);
     const supabase = createServerSupabaseClient();
 
-    // Verificar autenticación
+    // 1) Verificar autenticación
     const {
       data: { session },
     } = await supabase.auth.getSession();
-
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const id = parseInt(params.id);
-
+    // 2) Validar ID
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'ID de evento inválido' },
@@ -144,32 +130,33 @@ export async function DELETE(
       );
     }
 
-    // Verificar que el evento existe y obtener su imagen (si la tiene)
-    const { data: eventExists, error: existsError } = await supabase
+    // 3) Comprobar existencia y obtener URL de imagen
+    const { data: existing, error: existsError } = await supabase
       .from('events')
       .select('*')
       .eq('id', id)
       .single();
-
-    if (existsError || !eventExists) {
+    if (existsError || !existing) {
       return NextResponse.json(
         { error: 'Evento no encontrado' },
         { status: 404 }
       );
     }
 
-    // Si el evento tiene una imagen personalizada, eliminarla del storage
-    if (eventExists.image && !eventExists.image.includes('placeholder.jpg')) {
-      // Intentar eliminar la imagen de Supabase Storage
-      await deleteImage(eventExists.image);
+    // 4) Borrar imagen del storage si no es el placeholder
+    if (existing.image && !existing.image.includes('placeholder.jpg')) {
+      await deleteImage(existing.image);
     }
+
+    // 5) Eliminar el registro en la base de datos
+    await supabase.from('events').delete().eq('id', id);
 
     return NextResponse.json(
       { message: 'Evento eliminado correctamente' },
       { status: 200 }
     );
-  } catch (error) {
-    console.error('Error al eliminar evento:', error);
+  } catch (err) {
+    console.error('Error al eliminar evento:', err);
     return NextResponse.json(
       { error: 'Error al eliminar evento' },
       { status: 500 }
