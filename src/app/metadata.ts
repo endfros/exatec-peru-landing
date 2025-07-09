@@ -5,12 +5,9 @@ export const metadata: Metadata = {
   description:
     'La comunidad de exalumnos del Tecnológico de Monterrey en Perú que conecta talento y oportunidades.',
   icons: {
-    icon: [
-      { url: '/tec_logo.png', sizes: '32x32' },
-      { url: '/tec_logo.png', sizes: '16x16' },
-    ],
-    apple: [{ url: '/tec_logo.png' }],
-    shortcut: ['/tec_logo.png'],
+    icon: '/favicon.ico',
+    apple: '/app-icon.png',
+    shortcut: '/app-icon.png'
   },
   manifest: '/manifest.json',
 };
