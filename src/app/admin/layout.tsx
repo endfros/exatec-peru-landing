@@ -1,10 +1,8 @@
 'use client';
 
+import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { createBrowserSupabaseClient } from '@/lib/supabase/browser';
-import SessionChecker from '@/components/SessionChecker';
 
 export default function AdminLayout({
   children,
@@ -15,48 +13,20 @@ export default function AdminLayout({
 }
 
 function Content({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: session, status } = useSession();
   const pathname = usePathname();
-  const supabase = createBrowserSupabaseClient();
-
-  useEffect(() => {
-    async function checkSession() {
-      try {
-        const { data } = await supabase.auth.getSession();
-        setSession(data.session);
-      } catch (error) {
-        console.error('Error al verificar sesión:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    checkSession();
-
-    // Escuchar cambios en la sesión
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event: string, _session: any) => {
-        setSession(_session);
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
+  
   // Si está cargando, mostrar un estado de carga
-  if (loading) {
+  if (status === 'loading') {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-[#0053c7] text-lg">Cargando...</div>
       </div>
     );
   }
-
+  
   // Si no está autenticado, mostrar un mensaje y link de redirección
-  if (!session) {
+  if (status === 'unauthenticated') {
     if (pathname !== '/admin/login') {
       // Si no estamos en la página de login, redirigir
       window.location.href = '/admin/login';
@@ -69,7 +39,6 @@ function Content({ children }: { children: React.ReactNode }) {
   // Links de navegación para el panel de administrador
   const navLinks = [
     { name: 'Eventos', href: '/admin/eventos' },
-    { name: 'Directorio', href: '/admin/directorio' },
     { name: 'Configuración', href: '/admin/configuracion' },
   ];
 
@@ -101,13 +70,10 @@ function Content({ children }: { children: React.ReactNode }) {
 
           <div className="mt-8 pt-6 border-t border-white/10">
             <p className="text-white/70 mb-2 px-3">
-              Sesión: {session?.user?.email}
+              Sesión: {session?.user?.name}
             </p>
             <button
-              onClick={async () => {
-                await supabase.auth.signOut();
-                window.location.href = '/admin/login';
-              }}
+              onClick={() => signOut({ callbackUrl: '/' })}
               className="w-full text-left px-3 py-2 hover:bg-white/10 rounded-md"
             >
               Cerrar Sesión
@@ -127,9 +93,6 @@ function Content({ children }: { children: React.ReactNode }) {
         </header>
 
         <main className="p-6">{children}</main>
-
-        {/* Herramienta de depuración - remover en producción */}
-        <SessionChecker />
       </div>
     </div>
   );

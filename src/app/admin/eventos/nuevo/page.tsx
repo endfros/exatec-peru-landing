@@ -2,14 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import ImageUploader from '@/components/ImageUploader';
-import { createBrowserSupabaseClient } from '@/lib/supabase/browser';
 
 export default function NewEventPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sessionStatus, setSessionStatus] = useState<string>('');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -19,7 +16,6 @@ export default function NewEventPage() {
     category: '',
     description: '',
     image: '/placeholder.jpg',
-    registration_url: '',
   });
 
   const categoryOptions = [
@@ -29,13 +25,6 @@ export default function NewEventPage() {
     { value: 'social', label: 'Social' },
     { value: 'institutional', label: 'Institucional' },
   ];
-
-  const handleImageChange = (imageUrl: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      image: imageUrl,
-    }));
-  };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -55,86 +44,24 @@ export default function NewEventPage() {
     setError(null);
 
     try {
-      // Usando el cliente Supabase directamente
-      const supabase = createBrowserSupabaseClient();
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-      // Verificar la sesión primero
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        throw new Error(
-          'No hay sesión activa. Por favor, inicia sesión nuevamente.'
-        );
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Error al crear el evento');
       }
-
-      setSessionStatus(`Sesión activa: ${session.user.email}`);
-      console.log('Creando evento con usuario:', session.user.id);
-
-      // Validar datos
-      if (!formData.title || !formData.date || !formData.category) {
-        throw new Error(
-          'Por favor completa los campos requeridos: título, fecha y categoría'
-        );
-      }
-
-      // Crear el objeto de datos para insertar, sin el user_id inicialmente
-      const eventData = {
-        title: formData.title,
-        date: formData.date,
-        time: formData.time || '',
-        location: formData.location || '',
-        category: formData.category,
-        description: formData.description || '',
-        image: formData.image || '/placeholder.jpg',
-        registration_url: formData.registration_url || null,
-      };
-
-      console.log('Intentando crear evento:', eventData);
-
-      // Insertar directamente con Supabase sin user_id
-      const { data, error: insertError } = await supabase
-        .from('events')
-        .insert(eventData)
-        .select()
-        .single();
-
-      if (insertError) {
-        console.error('Error de Supabase:', insertError);
-
-        // Manejo específico para errores comunes
-        if (insertError.code === 'PGRST204') {
-          setError(
-            `Error: No se pudo encontrar una columna en la tabla. Es posible que necesites ejecutar el script SQL para actualizar la estructura de la tabla.`
-          );
-        } else {
-          throw new Error(
-            `Error al crear el evento: ${insertError.message} (${insertError.code})`
-          );
-        }
-        return; // Detener la ejecución aquí si hay error
-      }
-
-      console.log('Evento creado exitosamente:', data);
 
       // Redireccionar a la página de eventos
       router.push('/admin/eventos');
-    } catch (err) {
-      console.error('Error completo:', err);
-      let msg = 'Error desconocido al crear el evento';
-      if (err instanceof Error) {
-        if (err.message.includes('fetch')) {
-          msg =
-            'Error de conexión al servidor. Verifica tu conexión a internet.';
-        } else if (err.message.includes('JSON')) {
-          msg =
-            'Error en la respuesta del servidor. Contacta al administrador.';
-        } else {
-          msg = err.message;
-        }
-      }
-      setError(msg);
+    } catch (err: any) {
+      console.error('Error creating event:', err);
+      setError(err.message || 'Error al crear el evento');
     } finally {
       setLoading(false);
     }
@@ -155,12 +82,6 @@ export default function NewEventPage() {
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
           {error}
-        </div>
-      )}
-
-      {sessionStatus && (
-        <div className="mb-4 p-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-md text-sm">
-          {sessionStatus}
         </div>
       )}
 
@@ -281,39 +202,21 @@ export default function NewEventPage() {
 
             <div className="col-span-2">
               <label
-                htmlFor="registration_url"
+                htmlFor="image"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                URL de registro (opcional)
+                URL de Imagen
               </label>
               <input
-                type="url"
-                id="registration_url"
-                name="registration_url"
-                placeholder="Ej: https://forms.google.com/registro-evento"
-                value={formData.registration_url}
+                type="text"
+                id="image"
+                name="image"
+                value={formData.image}
                 onChange={handleChange}
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0053c7] focus:border-transparent"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Si proporcionas una URL, se mostrará un botón de registro en la
-                página del evento
-              </p>
-            </div>
-
-            <div className="col-span-2">
-              <label
-                htmlFor="image"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Imagen del Evento
-              </label>
-              <ImageUploader
-                value={formData.image}
-                onChange={handleImageChange}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Sube una imagen o ingresa una URL personalizada
+                Deja vacío para usar la imagen por defecto
               </p>
             </div>
           </div>

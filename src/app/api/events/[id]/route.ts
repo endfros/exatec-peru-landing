@@ -1,14 +1,14 @@
-// src/app/api/events/[id]/route.ts
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
 
-import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { deleteImage } from '@/lib/supabase/client';
-
-// GET: obtener un evento por ID
-export async function GET(request: NextRequest, { params }: any) {
+// GET para obtener un evento específico
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const id = parseInt(params?.id, 10);
-    const supabase = createServerSupabaseClient();
+    const id = parseInt(params.id);
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -17,13 +17,11 @@ export async function GET(request: NextRequest, { params }: any) {
       );
     }
 
-    const { data: event, error } = await supabase
-      .from('events')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const event = await prisma.event.findUnique({
+      where: { id },
+    });
 
-    if (error || !event) {
+    if (!event) {
       return NextResponse.json(
         { error: 'Evento no encontrado' },
         { status: 404 }
@@ -31,8 +29,8 @@ export async function GET(request: NextRequest, { params }: any) {
     }
 
     return NextResponse.json(event);
-  } catch (err) {
-    console.error('Error al obtener evento:', err);
+  } catch (error) {
+    console.error('Error al obtener evento:', error);
     return NextResponse.json(
       { error: 'Error al obtener evento' },
       { status: 500 }
@@ -40,21 +38,20 @@ export async function GET(request: NextRequest, { params }: any) {
   }
 }
 
-// PUT: actualizar un evento existente
-export async function PUT(request: NextRequest, { params }: any) {
+// PUT para actualizar un evento
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const id = parseInt(params.id, 10);
-    const supabase = createServerSupabaseClient();
-
-    // 1) Verificar autenticación
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    // Verificar autenticación
+    const session = await getServerSession();
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // 2) Validar ID
+    const id = parseInt(params.id);
+
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'ID de evento inválido' },
@@ -62,67 +59,58 @@ export async function PUT(request: NextRequest, { params }: any) {
       );
     }
 
-    const payload = await request.json();
+    const data = await request.json();
 
-    // 3) Verificar que el evento exista
-    const { data: existing, error: existsError } = await supabase
-      .from('events')
-      .select('*')
-      .eq('id', id)
-      .single();
-    if (existsError || !existing) {
+    // Verificar que el evento existe
+    const eventExists = await prisma.event.findUnique({
+      where: { id },
+    });
+
+    if (!eventExists) {
       return NextResponse.json(
         { error: 'Evento no encontrado' },
         { status: 404 }
       );
     }
 
-    // 4) Ejecutar actualización
-    const { data: updatedEvent, error: updateError } = await supabase
-      .from('events')
-      .update({
-        title: payload.title,
-        date: payload.date,
-        time: payload.time,
-        location: payload.location,
-        category: payload.category,
-        description: payload.description,
-        image: payload.image,
-        registration_url: payload.registration_url,
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (updateError) {
-      throw updateError;
-    }
+    // Actualizar evento
+    const updatedEvent = await prisma.event.update({
+      where: { id },
+      data: {
+        title: data.title,
+        date: data.date ? new Date(data.date) : undefined,
+        time: data.time,
+        location: data.location,
+        category: data.category,
+        description: data.description,
+        image: data.image,
+      },
+    });
 
     return NextResponse.json(updatedEvent);
-  } catch (err: any) {
-    console.error('Error al actualizar evento:', err);
+  } catch (error) {
+    console.error('Error al actualizar evento:', error);
     return NextResponse.json(
-      { error: err.message || 'Error al actualizar evento' },
+      { error: 'Error al actualizar evento' },
       { status: 500 }
     );
   }
 }
 
-// DELETE: eliminar un evento (y su imagen si aplica)
-export async function DELETE(request: NextRequest, { params }: any) {
+// DELETE para eliminar un evento
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   try {
-    const id = parseInt(params.id, 10);
-    const supabase = createServerSupabaseClient();
-
-    // 1) Verificar autenticación
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    // Verificar autenticación
+    const session = await getServerSession();
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // 2) Validar ID
+    const id = parseInt(params.id);
+
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'ID de evento inválido' },
@@ -130,33 +118,29 @@ export async function DELETE(request: NextRequest, { params }: any) {
       );
     }
 
-    // 3) Comprobar existencia y obtener URL de imagen
-    const { data: existing, error: existsError } = await supabase
-      .from('events')
-      .select('*')
-      .eq('id', id)
-      .single();
-    if (existsError || !existing) {
+    // Verificar que el evento existe
+    const eventExists = await prisma.event.findUnique({
+      where: { id },
+    });
+
+    if (!eventExists) {
       return NextResponse.json(
         { error: 'Evento no encontrado' },
         { status: 404 }
       );
     }
 
-    // 4) Borrar imagen del storage si no es el placeholder
-    if (existing.image && !existing.image.includes('placeholder.jpg')) {
-      await deleteImage(existing.image);
-    }
-
-    // 5) Eliminar el registro en la base de datos
-    await supabase.from('events').delete().eq('id', id);
+    // Eliminar evento
+    await prisma.event.delete({
+      where: { id },
+    });
 
     return NextResponse.json(
       { message: 'Evento eliminado correctamente' },
       { status: 200 }
     );
-  } catch (err) {
-    console.error('Error al eliminar evento:', err);
+  } catch (error) {
+    console.error('Error al eliminar evento:', error);
     return NextResponse.json(
       { error: 'Error al eliminar evento' },
       { status: 500 }

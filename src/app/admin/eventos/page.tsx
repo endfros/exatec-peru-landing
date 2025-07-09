@@ -2,34 +2,35 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-// import { useRouter } from 'next/navigation';
-import { Event } from '@/lib/supabase/client';
-import { createBrowserSupabaseClient } from '@/lib/supabase/browser';
+import { useRouter } from 'next/navigation';
 
-// Utilizamos el tipo Event importado desde el cliente de Supabase
+// Tipo para los eventos
+type Event = {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  category: string;
+  description: string;
+  image?: string;
+};
 
 export default function EventsAdminPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // const router = useRouter();
-
-  const supabase = createBrowserSupabaseClient();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchEvents() {
       try {
-        // Usando Supabase para obtener eventos
-        const { data: events, error } = await supabase
-          .from('events')
-          .select('*')
-          .order('date', { ascending: true });
-
-        if (error) {
-          throw error;
+        const response = await fetch('/api/events');
+        if (!response.ok) {
+          throw new Error('Error al cargar eventos');
         }
-
-        setEvents(events || []);
+        const data = await response.json();
+        setEvents(data);
       } catch (err) {
         setError('Error al cargar eventos');
         console.error('Error fetching events:', err);
@@ -39,7 +40,7 @@ export default function EventsAdminPage() {
     }
 
     fetchEvents();
-  }, [supabase]);
+  }, []);
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este evento?')) {
@@ -47,28 +48,12 @@ export default function EventsAdminPage() {
     }
 
     try {
-      // Primero, obtenemos el evento para ver si tiene una imagen que eliminar
-      const { data: event } = await supabase
-        .from('events')
-        .select('image')
-        .eq('id', id)
-        .single();
+      const response = await fetch(`/api/events/${id}`, {
+        method: 'DELETE',
+      });
 
-      // Si hay imagen y no es la imagen por defecto, eliminarla del storage
-      if (event?.image && !event.image.includes('placeholder.jpg')) {
-        // Extraer la última parte de la URL (el nombre del archivo)
-        const parts = event.image.split('/');
-        const fileName = parts[parts.length - 1];
-
-        // Eliminar la imagen del bucket "events"
-        await supabase.storage.from('events').remove([`images/${fileName}`]);
-      }
-
-      // Eliminar el evento
-      const { error } = await supabase.from('events').delete().eq('id', id);
-
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error('Error al eliminar el evento');
       }
 
       // Actualizar la lista de eventos después de eliminar

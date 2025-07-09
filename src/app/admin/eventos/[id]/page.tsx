@@ -2,11 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import ImageUploader from '@/components/ImageUploader';
 
-type Props = any;
+// Tipo para los eventos
+type Event = {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  category: string;
+  description: string;
+  image?: string;
+};
 
-export default function EditEventPage({ params }: Props) {
+// First, let's add explicit type for the page props
+type EditEventPageProps = {
+  params: {
+    id: string;
+  };
+};
+
+export default function EditEventPage({ params }: EditEventPageProps) {
   const router = useRouter();
   const eventId = params.id;
   const [loading, setLoading] = useState(true);
@@ -21,7 +37,6 @@ export default function EditEventPage({ params }: Props) {
     category: '',
     description: '',
     image: '',
-    registration_url: '',
   });
 
   const categoryOptions = [
@@ -32,35 +47,41 @@ export default function EditEventPage({ params }: Props) {
     { value: 'institutional', label: 'Institucional' },
   ];
 
+  // Cargar datos del evento al montar el componente
   useEffect(() => {
     async function fetchEvent() {
       try {
-        const res = await fetch(`/api/events/${eventId}`);
-        if (!res.ok) throw new Error('Error al cargar el evento');
-        const evt = await res.json();
-        const d = new Date(evt.date).toISOString().split('T')[0];
+        const response = await fetch(`/api/events/${eventId}`);
+
+        if (!response.ok) {
+          throw new Error('Error al cargar el evento');
+        }
+
+        const eventData = await response.json();
+
+        // Formatear la fecha para el input de tipo date (YYYY-MM-DD)
+        const eventDate = new Date(eventData.date);
+        const formattedDate = eventDate.toISOString().split('T')[0];
+
         setFormData({
-          title: evt.title,
-          date: d,
-          time: evt.time || '',
-          location: evt.location || '',
-          category: evt.category,
-          description: evt.description || '',
-          image: evt.image || '/placeholder.jpg',
-          registration_url: evt.registration_url || '',
+          title: eventData.title,
+          date: formattedDate,
+          time: eventData.time || '',
+          location: eventData.location || '',
+          category: eventData.category,
+          description: eventData.description || '',
+          image: eventData.image || '/placeholder.jpg',
         });
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error('Error fetching event:', err);
         setError('Error al cargar el evento');
       } finally {
         setLoading(false);
       }
     }
+
     fetchEvent();
   }, [eventId]);
-
-  const handleImageChange = (imageUrl: string) =>
-    setFormData((f) => ({ ...f, image: imageUrl }));
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -68,40 +89,48 @@ export default function EditEventPage({ params }: Props) {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((f) => ({ ...f, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
+
     try {
-      const res = await fetch(`/api/events/${eventId}`, {
+      const response = await fetch(`/api/events/${eventId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(formData),
       });
-      if (!res.ok) {
-        const body = await res.json();
-        throw new Error(body.error || 'Error al actualizar el evento');
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Error al actualizar el evento');
       }
+
+      // Redireccionar a la página de eventos
       router.push('/admin/eventos');
-    } catch (e) {
-      const msg =
-        e instanceof Error ? e.message : 'Error al actualizar el evento';
-      console.error(e);
-      setError(msg);
+    } catch (err: any) {
+      console.error('Error updating event:', err);
+      setError(err.message || 'Error al actualizar el evento');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="text-[#0053c7] text-lg">Cargando evento...</div>
       </div>
     );
+  }
 
   return (
     <div>
@@ -238,41 +267,19 @@ export default function EditEventPage({ params }: Props) {
 
             <div className="col-span-2">
               <label
-                htmlFor="registration_url"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                URL de registro (opcional)
-              </label>
-              <input
-                type="url"
-                id="registration_url"
-                name="registration_url"
-                placeholder="Ej: https://forms.google.com/registro-evento"
-                value={formData.registration_url}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0053c7] focus:border-transparent"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Si proporcionas una URL, se mostrará un botón de registro en la
-                página del evento
-              </p>
-            </div>
-
-            <div className="col-span-2">
-              <label
                 htmlFor="image"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Imagen del Evento
+                URL de Imagen
               </label>
-              <ImageUploader
+              <input
+                type="text"
+                id="image"
+                name="image"
                 value={formData.image}
-                onChange={handleImageChange}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0053c7] focus:border-transparent"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Sube una imagen a Supabase Storage o ingresa una URL
-                personalizada
-              </p>
             </div>
           </div>
 
