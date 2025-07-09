@@ -184,48 +184,58 @@ export default function Navbar() {
           <Link
             href="/"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
+            onClick={() => setIsMenuOpen(false)}
           >
             Inicio
           </Link>
 
-          <button
-            onClick={toggleAboutDropdown}
-            className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100 flex justify-between items-center"
-          >
-            Quienes Somos
-            <svg
-              className="ml-1 h-5 w-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
+          {/* Quienes Somos Dropdown for mobile */}
+          <div className="">
+            <button
+              onClick={() => setIsAboutDropdownOpen((open) => !open)}
+              className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100 flex justify-between items-center"
+              aria-expanded={isAboutDropdownOpen}
+              aria-controls="mobile-about-dropdown"
             >
-              <path
-                fillRule="evenodd"
-                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              ></path>
-            </svg>
-          </button>
-
-          {isAboutDropdownOpen && (
-            <div className="pl-4 border-l-2 border-gray-200 ml-3">
+              Quienes Somos
+              <svg
+                className={`ml-1 h-5 w-5 transform transition-transform duration-200 ${isAboutDropdownOpen ? 'rotate-180' : ''}`}
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                ></path>
+              </svg>
+            </button>
+            <div
+              id="mobile-about-dropdown"
+              className={`transition-all duration-200 ease-out overflow-hidden ${isAboutDropdownOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'} pl-4 border-l-2 border-gray-200 ml-3`}
+              style={{ pointerEvents: isAboutDropdownOpen ? 'auto' : 'none' }}
+            >
               <Link
                 href="/quienes-somos"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
+                onClick={() => { setIsMenuOpen(false); setIsAboutDropdownOpen(false); }}
               >
                 Misión y Visión
               </Link>
               <Link
                 href="/mesa-directiva"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
+                onClick={() => { setIsMenuOpen(false); setIsAboutDropdownOpen(false); }}
               >
                 Mesa Directiva
               </Link>
             </div>
-          )}
+          </div>
 
           <Link
             href="/eventos"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
+            onClick={() => setIsMenuOpen(false)}
           >
             Calendario de Eventos
           </Link>
@@ -233,6 +243,7 @@ export default function Navbar() {
           <Link
             href="/directorio"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
+            onClick={() => setIsMenuOpen(false)}
           >
             Directorio Empresarial
           </Link>
@@ -240,6 +251,7 @@ export default function Navbar() {
           <Link
             href="/unete"
             className="block rounded-md text-base font-bold bg-primary text-white hover:bg-blue-700 text-center px-4 py-2 mt-2 shadow-lg"
+            onClick={() => setIsMenuOpen(false)}
           >
             Únete
           </Link>

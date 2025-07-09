@@ -267,22 +267,22 @@ export default function EventDetailPage({ params }: any) {
               <div className="space-y-4">
                 <div>
                   <h4 className="font-semibold text-[#0053c7]">Fecha</h4>
-                  <p>{formatDate(event.date)}</p>
+                  <p className="text-black">{formatDate(event.date)}</p>
                 </div>
 
                 <div>
                   <h4 className="font-semibold text-[#0053c7]">Hora</h4>
-                  <p>{event.time}</p>
+                  <p className="text-black">{event.time}</p>
                 </div>
 
                 <div>
                   <h4 className="font-semibold text-[#0053c7]">Ubicación</h4>
-                  <p>{event.location}</p>
+                  <p className="text-black">{event.location}</p>
                 </div>
 
                 <div>
                   <h4 className="font-semibold text-[#0053c7]">Categoría</h4>
-                  <p>
+                  <p className="text-black">
                     {event.category.charAt(0).toUpperCase() +
                       event.category.slice(1)}
                   </p>
