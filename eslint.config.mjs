@@ -26,7 +26,7 @@ const eslintConfig = [
       '@typescript-eslint/ban-types': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/prefer-as-const': 'off',
-      
+
       // Desactivar reglas de React y Next.js
       'react-hooks/exhaustive-deps': 'off',
       'react/no-unescaped-entities': 'off',
@@ -36,7 +36,7 @@ const eslintConfig = [
       '@next/next/no-page-custom-font': 'off',
       '@next/next/no-img-element': 'off',
       '@next/next/no-html-link-for-pages': 'off',
-      
+
       // Desactivar reglas generales
       'no-unused-vars': 'off',
       'no-console': 'off',

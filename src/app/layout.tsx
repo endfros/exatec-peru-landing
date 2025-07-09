@@ -14,11 +14,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export const metadata = {
-  title: 'EXATEC Perú - Comunidad de Exalumnos del Tecnológico de Monterrey',
-  description:
-    'La comunidad de exalumnos del Tecnológico de Monterrey en Perú que conecta talento y oportunidades.',
-};
+// Los metadatos se importan desde metadata.ts
 
 export default function RootLayout({
   children,
