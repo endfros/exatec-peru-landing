@@ -130,7 +130,7 @@ export default function Navbar() {
 
             <Link
               href="/unete"
-              className="bg-white text-primary font-bold text-lg px-4 py-2 rounded-lg shadow-lg border-4 border-white ml-2 transition duration-300 hover:border-black hover:text-primary hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+              className="bg-white text-black font-bold text-lg px-4 py-2 rounded-lg shadow-lg border-4 border-white ml-2 transition duration-300 hover:border-black hover:text-primary hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary"
               style={{ boxShadow: '0 4px 16px 0 rgba(0,83,199,0.10)' }}
             >
               Únete

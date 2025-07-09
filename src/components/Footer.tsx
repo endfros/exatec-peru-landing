@@ -61,7 +61,7 @@ export default function Footer() {
             <div className="flex space-x-4">
               {/* Instagram */}
               <a
-                href="https://instagram.com/exatecperu"
+                href="https://instagram.com/exatec_peru"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white hover:text-accent transition-colors"
@@ -80,7 +80,7 @@ export default function Footer() {
 
               {/* LinkedIn */}
               <a
-                href="https://linkedin.com/company/exatecperu"
+                href="https://www.linkedin.com/in/exatecperu/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white hover:text-accent transition-colors"
