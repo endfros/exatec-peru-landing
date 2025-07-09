@@ -1,15 +1,16 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Features() {
   const features = [
     {
       title: 'Comunidad de Excelencia',
       description:
-        'Forma parte de una red de profesionales destacados en diversos ámbitos.',
+        'Forma parte de una red de profesionales destacados en diversos ámbitos y comparte experiencias con egresados del Tec.',
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-10 w-10"
+          className="h-12 w-12"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -21,11 +22,11 @@ export default function Features() {
     {
       title: 'Eventos Exclusivos',
       description:
-        'Participa en eventos de networking, webinars y actividades sociales.',
+        'Participa en eventos de networking, webinars y actividades sociales diseñadas específicamente para nuestra comunidad.',
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-10 w-10"
+          className="h-12 w-12"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -41,11 +42,11 @@ export default function Features() {
     {
       title: 'Directorio Empresarial',
       description:
-        'Conecta con otros miembros de EXATEC y descubre oportunidades profesionales.',
+        'Conecta con otros miembros de EXATEC y descubre oportunidades profesionales en un entorno de confianza y colaboración.',
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-10 w-10"
+          className="h-12 w-12"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -61,41 +62,51 @@ export default function Features() {
   ];
 
   return (
-    <section className="py-20 bg-[#0053c7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            ¿Por qué unirte a la comunidad EXATEC Perú?
+    <section className="py-24 relative bg-gradient-to-b from-[#0053c7] to-[#003a8c] overflow-hidden">
+      {/* Background shapes */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full translate-x-[-50%] translate-y-[-50%]"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-[30%] translate-y-[30%]"></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-white/5 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+            ¿Por qué unirte a la comunidad
+            <br className="hidden md:block" /> EXATEC Perú?
           </h2>
-          <p className="text-lg text-white/90 max-w-3xl mx-auto">
+          <p className="text-xl text-white/80 max-w-3xl mx-auto leading-relaxed">
             Descubre los beneficios de formar parte de nuestra comunidad de
             exalumnos del Tecnológico de Monterrey en Perú
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="rounded-lg p-8 text-center transition-shadow duration-300 border-4 border-white/40 bg-[#0053c7] hover:shadow-[0_8px_32px_0_rgba(255,255,255,0.25)]"
+              className="rounded-2xl p-8 text-center transition-all duration-500 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] hover:translate-y-[-8px] border border-white/10 group"
             >
-              <div className="text-white mb-4 inline-flex items-center justify-center">
+              <div className="text-white mb-6 inline-flex items-center justify-center bg-white/10 p-4 rounded-xl group-hover:bg-white/20 transition-all duration-500">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-white">
+              <h3 className="text-2xl font-bold mb-4 text-white">
                 {feature.title}
               </h3>
-              <p className="text-white/90 mb-5">{feature.description}</p>
+              <p className="text-white/80 mb-8 text-lg">
+                {feature.description}
+              </p>
               <Link
                 href={feature.link}
-                className="px-5 py-2 bg-white text-[#0053c7] font-semibold rounded-md shadow hover:bg-gray-100 transition duration-300 text-base border-2 border-white inline-flex items-center justify-center"
+                className="px-6 py-3 bg-white text-[#0053c7] font-bold rounded-xl shadow hover:shadow-lg transition-all duration-300 text-base inline-flex items-center justify-center group-hover:bg-[#0053c7] group-hover:text-white"
               >
                 Saber más
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 ml-1"
+                  className="h-5 w-5 ml-2 transition-transform duration-300 group-hover:translate-x-1"
                   viewBox="0 0 20 20"
-                  fill="#0053c7"
+                  fill="currentColor"
                 >
                   <path
                     fillRule="evenodd"
