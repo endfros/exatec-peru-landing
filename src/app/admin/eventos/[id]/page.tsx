@@ -3,18 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-// Tipo para los eventos
-type Event = {
-  id: number;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  category: string;
-  description: string;
-  image?: string;
-};
-
 // First, let's add explicit type for the page props
 type EditEventPageProps = {
   params: {
@@ -116,9 +104,10 @@ export default function EditEventPage({ params }: EditEventPageProps) {
 
       // Redireccionar a la página de eventos
       router.push('/admin/eventos');
-    } catch (err: any) {
-      console.error('Error updating event:', err);
-      setError(err.message || 'Error al actualizar el evento');
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Error desconocido');
+      console.error('Error updating event:', error);
+      setError(error.message || 'Error al actualizar el evento');
     } finally {
       setSaving(false);
     }

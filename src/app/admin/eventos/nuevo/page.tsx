@@ -59,9 +59,10 @@ export default function NewEventPage() {
 
       // Redireccionar a la página de eventos
       router.push('/admin/eventos');
-    } catch (err: any) {
-      console.error('Error creating event:', err);
-      setError(err.message || 'Error al crear el evento');
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Error desconocido');
+      console.error('Error creating event:', error);
+      setError(error.message || 'Error al crear el evento');
     } finally {
       setLoading(false);
     }
