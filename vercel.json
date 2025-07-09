@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm run build",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "buildEnvironment": {
+    "PRISMA_SCHEMA_ENGINE_BINARY": "/tmp/prisma-engines/query-engine",
+    "PRISMA_QUERY_ENGINE_BINARY": "/tmp/prisma-engines/query-engine",
+    "PRISMA_QUERY_ENGINE_LIBRARY": "/tmp/prisma-engines/query-engine"
+  }
+}

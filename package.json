@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:seed": "ts-node --project tsconfig-seed.json scripts/seed.ts",
@@ -12,7 +12,8 @@
     "db:seed-js": "node scripts/seed.js",
     "prisma:studio": "prisma studio",
     "migrate:to-supabase": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/migrate-to-supabase.ts",
-    "create-admin-user": "node scripts/create-admin-user.js"
+    "create-admin-user": "node scripts/create-admin-user.js",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.11.1",
