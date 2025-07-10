@@ -3,6 +3,7 @@ import './globals.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ClientAuthProvider from '../components/ClientAuthProvider';
+import { layoutMetadata } from './layout-metadata';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -14,7 +15,8 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-// Los metadatos se importan desde metadata.ts
+// Metadatos explícitos para el layout raíz
+export const metadata = layoutMetadata;
 
 export default function RootLayout({
   children,
