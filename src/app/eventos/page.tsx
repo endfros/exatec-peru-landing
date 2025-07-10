@@ -64,10 +64,10 @@ export default function EventsPage() {
 
   // Función para verificar si un evento ya pasó
   const hasEventPassed = (dateString: string) => {
-    const eventDate = new Date(dateString);
-    eventDate.setHours(23, 59, 59, 999); // Fin del día del evento
-    const today = new Date();
-    return eventDate < today;
+    const [year, month, day] = dateString.split('-').map(Number);
+    const eventDate = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+    const now = new Date();
+    return eventDate < now;
   };
 
   // Filtramos eventos por categoría y por fecha (pasados/futuros)
@@ -86,8 +86,20 @@ export default function EventsPage() {
       return true;
     })
     .sort((a: Event, b: Event) => {
-      // Ordenamos por fecha (más cercanos primero)
-      return new Date(a.date).getTime() - new Date(b.date).getTime();
+      // Ordenamos por fecha (más cercanos primero) usando UTC
+      const aParts = a.date.split('-');
+      const bParts = b.date.split('-');
+      const aUTC = Date.UTC(
+        Number(aParts[0]),
+        Number(aParts[1]) - 1,
+        Number(aParts[2])
+      );
+      const bUTC = Date.UTC(
+        Number(bParts[0]),
+        Number(bParts[1]) - 1,
+        Number(bParts[2])
+      );
+      return aUTC - bUTC;
     });
 
   const categories = [
@@ -101,12 +113,15 @@ export default function EventsPage() {
 
   // Function to format date
   const formatDate = (dateString: string) => {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'UTC',
     };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
+    return date.toLocaleDateString('es-ES', options);
   };
 
   if (loading) {

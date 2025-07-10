@@ -29,27 +29,48 @@ export default function UpcomingEvents() {
       try {
         setLoading(true);
         const response = await fetch('/api/events');
+
         if (!response.ok) {
           throw new Error('Error al cargar eventos');
         }
         const data = await response.json();
 
-        // Filtrar eventos futuros (fecha mayor o igual a hoy)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // Ordenar eventos del más reciente al más antiguo usando UTC
+        const sortedEvents = [...data].sort((a: Event, b: Event) => {
+          const aParts = a.date.split('-');
+          const bParts = b.date.split('-');
+          const aUTC = Date.UTC(
+            Number(aParts[0]),
+            Number(aParts[1]) - 1,
+            Number(aParts[2])
+          );
+          const bUTC = Date.UTC(
+            Number(bParts[0]),
+            Number(bParts[1]) - 1,
+            Number(bParts[2])
+          );
+          return bUTC - aUTC;
+        });
 
-        const upcomingEvents = data
-          .filter((event: Event) => {
-            const eventDate = new Date(event.date);
-            return eventDate >= today;
-          })
-          .sort((a: Event, b: Event) => {
-            // Ordenar por fecha (más cercanos primero)
-            return new Date(a.date).getTime() - new Date(b.date).getTime();
-          })
-          .slice(0, 5); // Limitar a 5 eventos
+        // Log fechas de cada evento (string y UTC)
+        sortedEvents.forEach((event: Event, idx: number) => {
+          const parts = event.date.split('-');
+          const utc = Date.UTC(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2])
+          );
+          console.log(
+            `Evento #${idx + 1}:`,
+            event.title,
+            '| Fecha:',
+            event.date,
+            '| UTC:',
+            new Date(utc).toISOString().slice(0, 10)
+          );
+        });
 
-        setEvents(upcomingEvents);
+        setEvents(sortedEvents);
       } catch (err) {
         setError('No se pudieron cargar los eventos');
         console.error('Error fetching events:', err);
@@ -60,6 +81,8 @@ export default function UpcomingEvents() {
 
     fetchEvents();
   }, []);
+
+  console.log(events);
 
   // Auto-rotación del carrusel
   useEffect(() => {
@@ -86,20 +109,24 @@ export default function UpcomingEvents() {
 
   // Formatear fecha
   const formatDate = (dateString: string) => {
+    // Usar UTC para evitar desfases
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'UTC',
     };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
+    return date.toLocaleDateString('es-ES', options);
   };
 
   // Verificar si un evento ya pasó
   const hasEventPassed = (dateString: string) => {
-    const eventDate = new Date(dateString);
-    eventDate.setHours(23, 59, 59, 999); // Fin del día del evento
-    const today = new Date();
-    return eventDate < today;
+    const [year, month, day] = dateString.split('-').map(Number);
+    const eventDate = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+    const now = new Date();
+    return eventDate < now;
   };
 
   if (loading) {
@@ -125,6 +152,8 @@ export default function UpcomingEvents() {
       </section>
     );
   }
+
+  console.log(events);
 
   if (error || events.length === 0) {
     return (

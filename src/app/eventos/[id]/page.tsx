@@ -58,14 +58,25 @@ export default function EventDetailPage({ params }: any) {
   // Formatear fecha
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
-
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
     const options: Intl.DateTimeFormatOptions = {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'UTC',
     };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
+    return date.toLocaleDateString('es-ES', options);
+  };
+
+  // Verificar si el evento ya pasó (usando UTC)
+  const hasEventPassed = (dateString: string) => {
+    if (!dateString) return false;
+    const [year, month, day] = dateString.split('-').map(Number);
+    const eventDate = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+    const now = new Date();
+    return eventDate < now;
   };
 
   if (loading) {
@@ -295,7 +306,7 @@ export default function EventDetailPage({ params }: any) {
                 ¿Quieres asistir?
               </h3>
 
-              {new Date(event.date) < new Date() ? (
+              {hasEventPassed(event.date) ? (
                 <div className="mb-4">
                   <div className="p-4 bg-gray-200 rounded-md mb-4">
                     <p className="text-gray-600 font-medium text-center">
