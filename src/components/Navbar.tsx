@@ -2,13 +2,15 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutDropdownOpen, setIsAboutDropdownOpen] = useState(false);
   const aboutDropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
-  // Cierra el dropdown al hacer click fuera
+  // Cierra el dropdown al hacer click fuera - solo para desktop
   useEffect(() => {
     if (!isAboutDropdownOpen) return;
     function handleClickOutside(event: MouseEvent) {
@@ -25,19 +27,26 @@ export default function Navbar() {
     };
   }, [isAboutDropdownOpen]);
 
+  // Limpiar los menús cuando se cambia de ruta
+  useEffect(() => {
+    const handleCleanup = () => {
+      setIsMenuOpen(false);
+    };
+    
+    return () => {
+      handleCleanup();
+    };
+  }, []);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    if (isAboutDropdownOpen) setIsAboutDropdownOpen(false);
   };
 
-  // Open dropdown on click or hover
+  // Open dropdown on click or hover - solo para desktop
   const toggleAboutDropdown = () => {
     setIsAboutDropdownOpen((open) => !open);
   };
-  // These functions were not being used and have been commented out
-  // const openAboutDropdown = () => setIsAboutDropdownOpen(true);
-  // const closeAboutDropdown = () => setIsAboutDropdownOpen(false);
-
+  
   return (
     <nav className="bg-[#0053c7] shadow-md sticky top-0 z-50 py-2 md:py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -188,49 +197,22 @@ export default function Navbar() {
           >
             Inicio
           </Link>
-
-          {/* Quienes Somos Dropdown for mobile */}
-          <div className="">
-            <button
-              onClick={() => setIsAboutDropdownOpen((open) => !open)}
-              className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100 flex justify-between items-center"
-              aria-expanded={isAboutDropdownOpen}
-              aria-controls="mobile-about-dropdown"
-            >
-              Quienes Somos
-              <svg
-                className={`ml-1 h-5 w-5 transform transition-transform duration-200 ${isAboutDropdownOpen ? 'rotate-180' : ''}`}
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                ></path>
-              </svg>
-            </button>
-            <div
-              id="mobile-about-dropdown"
-              className={`transition-all duration-200 ease-out overflow-hidden ${isAboutDropdownOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'} pl-4 border-l-2 border-gray-200 ml-3`}
-              style={{ pointerEvents: isAboutDropdownOpen ? 'auto' : 'none' }}
-            >
-              <Link
-                href="/quienes-somos"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
-                onClick={() => { setIsMenuOpen(false); setIsAboutDropdownOpen(false); }}
-              >
-                Misión y Visión
-              </Link>
-              <Link
-                href="/mesa-directiva"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
-                onClick={() => { setIsMenuOpen(false); setIsAboutDropdownOpen(false); }}
-              >
-                Mesa Directiva
-              </Link>
-            </div>
-          </div>
+          
+          <Link
+            href="/quienes-somos"
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Misión y Visión
+          </Link>
+          
+          <Link
+            href="/mesa-directiva"
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-100"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Mesa Directiva
+          </Link>
 
           <Link
             href="/eventos"
